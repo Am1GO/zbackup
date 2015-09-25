@@ -3,8 +3,6 @@
 
 #include "sha256.hh"
 
-using namespace std;
-
 Sha256::Sha256()
 {
   SHA256_Init( &ctx );
