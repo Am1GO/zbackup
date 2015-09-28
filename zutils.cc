@@ -188,6 +188,50 @@ ZRestore::ZRestore( string const & storageDir, string const & password,
 {
 }
 
+void ZRestore::restoreToDirectory( string const & inputDirectoryName, string const & outputDirectoryName )
+{
+  std::list< string > dirs;
+  dirs.push_front( inputDirectoryName );
+  
+  while ( !dirs.empty() )
+  {
+    string dir = dirs.front();
+    dirs.pop_front();
+    
+    Dir::Listing list( dir );
+    Dir::Entry e;
+    while ( list.getNext( e ) )
+    {
+      string srcPath = Dir::addPath( dir, e.getFileName() );
+      string relativePath = srcPath.substr( inputDirectoryName.size() );
+
+      // Chop leading slash, which may be present depending on whether the 
+      // command line arg had a trailing slash or not
+      while ( !relativePath.empty() && Dir::separator() == relativePath[ 0 ] )
+        relativePath = relativePath.substr( 1 );
+
+      // Calculate output path as function of path relative to input dir
+      string outputPath = Dir::addPath( outputDirectoryName, relativePath );
+
+      // Make sure directory structure for destination file exists
+      string destDir = Dir::getDirName( outputPath );
+      if ( ! Dir::exists( destDir ) )
+        Dir::create( destDir );
+
+      if ( e.isDir() ) // recurse dir tree
+      {
+        if ( ! Dir::exists( outputPath ) )
+          Dir::create( outputPath );
+        dirs.push_front( srcPath );
+      }
+      else if ( File::special( srcPath ) )
+        fprintf( stderr, "WARNING: ignoring special file: %s\n", srcPath.c_str() );
+      else 
+        restoreToFile( srcPath, outputPath );
+    }
+  }
+}
+
 void ZRestore::restoreToFile( string const & inputFileName, string const & outputFileName )
 {
   BackupInfo backupInfo;

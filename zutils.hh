@@ -43,6 +43,10 @@ public:
   /// Restores the data to file
   void restoreToFile( string const & inputFileName, string const & outputFileName );
 
+  /// Restores the data to directory
+  void restoreToDirectory( string const & inputDirectoryName,
+      string const & outputDirectoryName );
+
   /// Restores the data to stdout
   void restoreToStdin( string const & inputFileName );
 };

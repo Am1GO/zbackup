@@ -173,6 +173,9 @@ invalid_option:
 "    restore <backup file name> - restores a backup to stdout\n"
 "    restore <backup file name> <output file name> - restores\n"
 "            a backup to file using two-pass \"cacheless\" process\n"
+"    restore <backup dir> <output dir> - restores all backups contained\n"
+"            in specified directory using two-pass \"cacheless\" process\n"
+"            preserving directory hierarchy\n"
 "    export <source storage path> <destination storage path> -\n"
 "            performs export from source to destination storage\n"
 "    import <source storage path> <destination storage path> -\n"
@@ -273,7 +276,12 @@ invalid_option:
       ZRestore zr( ZRestore::deriveStorageDirFromBackupsFile( args[ 1 ] ),
                    passwords[ 0 ], config );
       if ( args.size() == 3 )
-        zr.restoreToFile( args[ 1 ], args[ 2 ] );
+      {
+        if ( Dir::exists( args[ 1 ] ) )
+          zr.restoreToDirectory( args[ 1 ], args[ 2 ] );
+        else
+          zr.restoreToFile( args[ 1 ], args[ 2 ] );
+      }
       else
         zr.restoreToStdin( args[ 1 ] );
     }
