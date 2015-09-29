@@ -226,14 +226,26 @@ void ZRestore::restoreToDirectory( string const & inputDirectoryName, string con
       }
       else if ( File::special( srcPath ) )
         fprintf( stderr, "WARNING: ignoring special file: %s\n", srcPath.c_str() );
-      else 
-        restoreToFile( srcPath, outputPath );
+      else
+      {
+        try
+        {
+          restoreToFile( srcPath, outputPath );
+        }
+        catch( exWontOverwrite & e )
+        {
+          fprintf( stderr, "%s\n", e.what() );
+        }
+      }
     }
   }
 }
 
 void ZRestore::restoreToFile( string const & inputFileName, string const & outputFileName )
 {
+  if ( File::exists( outputFileName ) )
+    throw exWontOverwrite( outputFileName );
+
   BackupInfo backupInfo;
 
   BackupFile::load( inputFileName, encryptionkey, backupInfo );
